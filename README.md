@@ -1,4 +1,4 @@
 # ComputationalProject
 Project Computational
 
-Dit is the main code branch
+This is the main code branch
