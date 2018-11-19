@@ -22,7 +22,7 @@ class Pendulum:
 	Tmax=20
 	dt=0.01
 
-	def __init__(self,angle=(pi/100,-pi/100),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi,-pi/2),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s
@@ -34,7 +34,8 @@ class Pendulum:
 		self.MinE=-Pendulum.g*(self.l1*(self.m1+self.m2)+self.l2*self.m2)
 		self.H0=self.GetH()
 		self.time=0
-		self.path=np.array([self.GetXY()[1]])
+		#self.path=np.array([self.GetXY()[1]])
+		self.PSPath=np.array([[self.t1,self.t2,self.w1,self.w2]])# Phase space path
 
 	def GetThetaOmega(self):
 		return np.array([[self.t1,self.w1],[self.t2,self.w2]])
@@ -53,29 +54,34 @@ class Pendulum:
 		dt=Pendulum.dt
 		Unext=U+F1(U,dt,F,Peninfo)/6+2/6*(F2(U,dt,F,Peninfo)+F3(U,dt,F,Peninfo))+F4(U,dt,F,Peninfo)/6
 		(self.t1,self.t2,self.w1,self.w2)=Unext
-		self.path=np.concatenate((self.path,np.array([self.GetXY()[1]])))
-    
+		#self.path=np.concatenate((self.path,np.array([self.GetXY()[1]])))
+		print(Unext)
+		self.PSPath=np.concatenate((self.PSPath,[Unext]))
 
 	def Solve(self):
 		Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
 		U_0=(self.t1,self.t2,self.w1,self.w2)
 		t,U=RK4(Pendulum.dt,Pendulum.Tmax,F,U_0,Peninfo)
 		(self.t1,self.t2,self.w1,self.w2)=U[-1]
-		self.time=t[-1]
+		self.time+=t[-1]
 		x2,y2=ThetatoXY(U[:,0],U[:,1],self.l1,self.l2)
-		self.path=np.stack((x2,y2),axis=-1)
+		#self.path=np.stack((x2,y2),axis=-1)
+		self.PSPath=np.concatenate((self.PSPath[:-1],U))# Everything except the last one since this is the first element of U
 
 	def ShowPath(self):
-		x2=self.path[:,0]
-		y2=self.path[:,1]
+		path=self.GetPath()
 		plt.ylim([-2.5,2.5])
 		plt.xlim([-2.5,2.5])
 		plt.grid()
-		plt.plot(y2,-x2)
+		plt.plot(path[:,1],-path[:,0])
 		plt.show()
 
 	def GetPath(self):
-		return self.path
+		x2,y2=ThetatoXY(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
+		Path=np.zeros((len(self.PSPath),2))
+		Path[:,0]=x2
+		Path[:,1]=y2
+		return Path
 
 	def GetV(self):
 		MinE=self.MinE
@@ -99,5 +105,5 @@ class Pendulum:
 		return np.log10(self.H0-self.GetH())
 
 DB=Pendulum()
-DB.Solve()
-DB.ShowPath()
+#DB.Solve()
+#DB.ShowPath()
