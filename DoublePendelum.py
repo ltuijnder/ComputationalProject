@@ -20,7 +20,7 @@ def ThetatoXY(t1,t2,l1,l2):
 class Pendulum:
 	g=9.81
 	Tmax=20
-	dt=0.01
+	dt=0.0005
 
 	def __init__(self,angle=(pi,-pi/2),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
@@ -83,27 +83,35 @@ class Pendulum:
 		Path[:,1]=y2
 		return Path
 
-	def GetV(self):
+	def GetV(self,PhaseSpace=0):
+		if type(PhaseSpace) is int:
+			PhaseSpace=np.array([[self.t1,self.t2,self.w1,self.w2]])
 		MinE=self.MinE
-		E1=Pendulum.g*self.l1*(self.m1+self.m2)*cos(self.t1)
-		E2=Pendulum.g*self.l2*self.m2*cos(self.t2)
+		E1=Pendulum.g*self.l1*(self.m1+self.m2)*cos(PhaseSpace[:,0])
+		E2=Pendulum.g*self.l2*self.m2*cos(PhaseSpace[:,1])
 		return -MinE-E1-E2
 
-	def GetT(self):
-		term1=self.l1**2*self.w1**2*(self.m1+self.m2)/2
-		term2=self.l2**2*self.w2**2*self.m2/2
-		term3=self.m2*self.l1*self.l2*self.w1*self.w2
+	def GetT(self,PhaseSpace=0):
+		if type(PhaseSpace) is int:
+			PhaseSpace=np.array([[self.t1,self.t2,self.w1,self.w2]])
+		term1=self.l1**2*PhaseSpace[:,2]**2*(self.m1+self.m2)/2
+		term2=self.l2**2*PhaseSpace[:,3]**2*self.m2/2
+		term3=self.m2*self.l1*self.l2*PhaseSpace[:,2]*PhaseSpace[:,3]
 		return term1+term2+term3
 
-	def GetL(self):
-		return self.GetT()-self.GetV()
+	def GetL(self,PhaseSpace=0):
+		return self.GetT(PhaseSpace)-self.GetV(PhaseSpace)
 
-	def GetH(self):
-		return self.GetT()+self.GetV()
+	def GetH(self,PhaseSpace=0):
+		return self.GetT(PhaseSpace)+self.GetV(PhaseSpace)
 
-	def LogDiffH(self):
-		return np.log10(self.H0-self.GetH())
+	def ShowH(self):
+		plt.plot(np.arange(len(self.PSPath)),self.GetH(self.PSPath))
+		plt.show()
 
-DB=Pendulum()
-#DB.Solve()
-#DB.ShowPath()
+	def LogDiffH(self,PhaseSpace=0):
+		return np.log10(self.H0-self.GetH(PhaseSpace))
+
+DP=Pendulum()
+#DP.Solve()
+#DP.ShowPath()
