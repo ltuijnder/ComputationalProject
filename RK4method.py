@@ -6,8 +6,6 @@ temp=np.zeros(4)# (t1,t2,w1,w2)
 # Peninfo=(g,m1,m2,l1,l2)
 #         (0, 1, 2, 3, 4)
 def F(U_i,Peninfo):
-    temp[0]=U_i[2]
-    temp[1]=U_i[3]
     st1=np.sin(U_i[0])
     st2=np.sin(U_i[1])
     ct1t2=np.cos(U_i[0]-U_i[1])
@@ -23,6 +21,8 @@ def F(U_i,Peninfo):
     denominator=1+mr-ct1t2**2
     w1_numerator=g/l1*(st1*ct1t2-(mr+1)*st1)-w1**2/2*s2t1t2-lx*w2**2*st1t2
     w2_numerator=(1+mr)*w1**2/lx*st1t2+w2**2/2*s2t1t2-g/l2*(mr+1)*(st2+st1*ct1t2)
+    temp[0]=w1
+    temp[1]=w2
     temp[2]=w1_numerator/denominator
     temp[3]=w2_numerator/denominator
     return temp

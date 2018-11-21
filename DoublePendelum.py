@@ -19,10 +19,10 @@ def ThetatoXY(t1,t2,l1,l2):
 
 class Pendulum:
 	g=9.81
-	Tmax=20
-	dt=0.0005
+	Tmax=1
+	dt=0.01
 
-	def __init__(self,angle=(pi,-pi/2),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi/2,0),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s
@@ -113,5 +113,5 @@ class Pendulum:
 		return np.log10(self.H0-self.GetH(PhaseSpace))
 
 DP=Pendulum()
-#DP.Solve()
+DP.Solve()
 #DP.ShowPath()
