@@ -1,6 +1,3 @@
 # ComputationalProject
-This is the lennart-branch
-
-
-hello
+This is the Master branch
 
