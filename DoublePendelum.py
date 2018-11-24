@@ -19,8 +19,8 @@ def ThetatoXY(t1,t2,l1,l2):
 
 class Pendulum:
 	g=9.81
-	Tmax=2.4
-	dt=0.0005
+	Tmax=4
+	dt=0.01
 
 	def __init__(self,angle=(pi/2,0),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
@@ -64,14 +64,12 @@ class Pendulum:
 		U_0=(self.t1,self.t2,self.w1,self.w2)
 
 		if method=='RK4':
-			t,U=RK4(Pendulum.dt,Pendulum.Tmax,F_internet,U_0,Peninfo)#F_internet
+			t,U=RK4(Pendulum.dt,Pendulum.Tmax,F,U_0,Peninfo)#F_internet
 		elif method=='Euler':
-			t,U=euler(Pendulum.dt,Pendulum.Tmax,F_internet,U_0,Peninfo)#F_internet
+			t,U=euler(Pendulum.dt,Pendulum.Tmax,F,U_0,Peninfo)#F_internet
 
 		(self.t1,self.t2,self.w1,self.w2)=U[-1]
 		self.time+=t[-1]
-		x2,y2=ThetatoXY(U[:,0],U[:,1],self.l1,self.l2)
-		#self.path=np.stack((x2,y2),axis=-1)
 		self.PSPath=np.concatenate((self.PSPath[:-1],U))# Everything except the last one since this is the first element of U
 
 	def ShowPath(self):
