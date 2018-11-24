@@ -28,7 +28,7 @@ def F(U_i,Peninfo):
     temp[3]=w2_numerator/denominator
     return temp
 
-def F_internet(U_i,Peninfo):
+def F_internet(U_i,Peninfo):  #the "correct" one
     g=Peninfo[0]
     m1=Peninfo[1]
     m2=Peninfo[2]

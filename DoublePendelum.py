@@ -2,7 +2,6 @@
 ##############################################
 ## Project DoublePendulum by Lennart & Yens
 ##############################################
-
 import numpy as np 
 import matplotlib.pyplot as plt
 from numpy import sin 
@@ -68,9 +67,9 @@ class Pendulum:
 		elif method=='Euler':
 			t,U=euler(Pendulum.dt,Pendulum.Tmax,F_internet,U_0,Peninfo)#F_internet
 
-		(self.t1,self.t2,self.w1,self.w2)=U[-1]
-		self.time+=t[-1]
-		x2,y2=ThetatoXY(U[:,0],U[:,1],self.l1,self.l2)
+		(self.t1,self.t2,self.w1,self.w2)=U[-1] #Current phasespace coords = last element of U
+		self.time+=t[-1] 
+		#x2,y2=ThetatoXY(U[:,0],U[:,1],self.l1,self.l2)
 		#self.path=np.stack((x2,y2),axis=-1)
 		self.PSPath=np.concatenate((self.PSPath[:-1],U))# Everything except the last one since this is the first element of U
 
@@ -81,7 +80,6 @@ class Pendulum:
 		plt.grid()
 		plt.plot(path[:,1],-path[:,0])
 		plt.show()
-
 	def GetPath(self):
 		x2,y2=ThetatoXY(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
 		Path=np.zeros((len(self.PSPath),2))
