@@ -4,6 +4,7 @@
 ##############################################
 import numpy as np 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from numpy import sin 
 from numpy import cos
 from numpy import pi
@@ -18,10 +19,11 @@ def ThetatoXY(t1,t2,l1,l2):
 
 class Pendulum:
 	g=9.81
-	Tmax=4
+	Tmax=10
 	dt=0.01
+	t=np.arange(0,Tmax,dt)
 
-	def __init__(self,angle=(pi/2,0),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi/2,pi/2),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s
@@ -123,5 +125,36 @@ class Pendulum:
 
 DP=Pendulum()
 DP.Solve('RK4')
-DP.ShowPath()
-DP.ShowH()
+#DP.ShowPath()
+#DP.ShowH()
+
+fig = plt.figure()
+ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2,2),ylim=(-2,2))
+ax.grid()
+
+line, = ax.plot([],[], 'o-',lw=2 )
+#define an initial state for the animation:
+
+def init():
+	line.set_data([],[])
+	return line
+
+#perform animation step
+
+def animate(i):
+	global DP
+	DP.NextStep()
+	line.set_data(DP.GetXY())
+	return line
+
+from time import time
+
+time_0=time()
+animate(0)
+time_1=time()
+I=1000*DP.dt-(time_1-time_0)
+
+ani=animation.FuncAnimation(fig,animate,frames=150, interval=I,init_func=init)
+
+plt.show()
+	
