@@ -10,13 +10,6 @@ from numpy import cos
 from numpy import pi
 from RK4method import *
 
-def ThetatoXY(t1,t2,l1,l2):
-    x1=l1*cos(t1)
-    y1=l1*sin(t1)
-    x2=x1+l2*cos(t2)
-    y2=y1+l2*sin(t2)
-    return x2,y2
-
 class Pendulum:
 	g=9.81
 	Tmax=4
@@ -32,9 +25,9 @@ class Pendulum:
 		self.l1=length[0] # in meter
 		self.l2=length[1] # in meter
 		self.MinE=-Pendulum.g*(self.l1*(self.m1+self.m2)+self.l2*self.m2)
+		self.Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
 		self.H0=self.GetH()
 		self.time=0
-		#self.path=np.array([self.GetXY()[1]])
 		self.PSPath=np.array([[self.t1,self.t2,self.w1,self.w2]])# Phase space path
 
 	def GetThetaOmega(self):
@@ -47,27 +40,29 @@ class Pendulum:
 		y2=y1+self.l2*sin(self.t2)
 		return np.array([[x1,y1],[x2,y2]])
 
-	def NextStep(self):
-		self.time+=Pendulum.dt
-		Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
-		U=(self.t1,self.t2,self.w1,self.w2)
-		dt=Pendulum.dt
-		Unext=U+F1(U,dt,F,Peninfo)/6+2/6*(F2(U,dt,F,Peninfo)+F3(U,dt,F,Peninfo))+F4(U,dt,F,Peninfo)/6
-		(self.t1,self.t2,self.w1,self.w2)=Unext
-		#self.path=np.concatenate((self.path,np.array([self.GetXY()[1]])))
-		print(Unext)
-		self.PSPath=np.concatenate((self.PSPath,[Unext]))
+	# def NextStep(self):
+	# 	self.time+=Pendulum.dt
+	# 	Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
+	# 	U=(self.t1,self.t2,self.w1,self.w2)
+	# 	dt=Pendulum.dt
+	# 	Unext=U+F1(U,dt,F,Peninfo)/6+2/6*(F2(U,dt,F,Peninfo)+F3(U,dt,F,Peninfo))+F4(U,dt,F,Peninfo)/6
+	# 	(self.t1,self.t2,self.w1,self.w2)=Unext
+	# 	self.PSPath=np.concatenate((self.PSPath,[Unext]))
+
+	def SetPhaseSpace(self,U):
+		self.t1=U[0]
+		self.t2=U[1]
+		self.w1=U[2]
+		self.w2=U[3]
+		self.PSPath=np.concatenate((self.PSPath,np.array([U])))
 
 	def Solve(self,method):
-		Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
-		#print(Peninfo)
+		#Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
 		U_0=(self.t1,self.t2,self.w1,self.w2)
-
 		if method=='RK4':
-			t,U=RK4(Pendulum.dt,Pendulum.Tmax,F,U_0,Peninfo)#F_internet
+			t,U=RK4(Pendulum.dt,Pendulum.Tmax,F,U_0,self.Peninfo)
 		elif method=='Euler':
-			t,U=euler(Pendulum.dt,Pendulum.Tmax,F,U_0,Peninfo)#F_internet
-
+			t,U=euler(Pendulum.dt,Pendulum.Tmax,F,U_0,self.Peninfo)
 		(self.t1,self.t2,self.w1,self.w2)=U[-1]
 		self.time+=t[-1]
 		self.PSPath=np.concatenate((self.PSPath[:-1],U))# Everything except the last one since this is the first element of U
@@ -80,8 +75,18 @@ class Pendulum:
 		plt.plot(path[:,1],-path[:,0])
 		plt.show()
 
+	def GetXY2(self,t1=0,t2=0):
+		if type(t1) is int:
+			t1=self.t1
+			t2=self.t2
+		x1=self.l1*cos(t1)
+		y1=self.l1*sin(t1)
+		x2=x1+self.l2*cos(t2)
+		y2=y1+self.l2*sin(t2)
+		return x2,y2	
+
 	def GetPath(self):
-		x2,y2=ThetatoXY(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
+		x2,y2=self.GetXY2(self.PSPath[:,0],self.PSPath[:,1])
 		Path=np.zeros((len(self.PSPath),2))
 		Path[:,0]=x2
 		Path[:,1]=y2
@@ -123,8 +128,3 @@ class Pendulum:
 
 	def LogDiffH(self,PhaseSpace=0):
 		return np.log10(self.H0-self.GetH(PhaseSpace))
-
-DP=Pendulum()
-DP.Solve('RK4')
-DP.ShowPath()
-DP.ShowH()
