@@ -5,10 +5,13 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib import style
 from numpy import sin 
 from numpy import cos
 from numpy import pi
 from RK4method import *
+
+style.use('seaborn')
 
 def ThetatoXY(t1,t2,l1,l2):
     x1=l1*cos(t1)
@@ -19,11 +22,11 @@ def ThetatoXY(t1,t2,l1,l2):
 
 class Pendulum:
 	g=9.81
-	Tmax=10
+	Tmax=20
 	dt=0.01
 	t=np.arange(0,Tmax,dt)
 
-	def __init__(self,angle=(pi/2,pi/2),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi/2,0),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s
@@ -46,7 +49,7 @@ class Pendulum:
 		y1=self.l1*sin(self.t1)
 		x2=x1+self.l2*cos(self.t2)
 		y2=y1+self.l2*sin(self.t2)
-		return np.array([[x1,y1],[x2,y2]])
+		return np.array([x1,y1]),np.array([x2,y2])
 
 	def NextStep(self):
 		self.time+=Pendulum.dt
@@ -130,29 +133,31 @@ DP.Solve('RK4')
 
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2,2),ylim=(-2,2))
-ax.grid()
+#ax.grid()
 
 line, = ax.plot([],[], 'o-',lw=2 )
+H_text=ax.text(1.0,0.95, '',transform=ax.transAxes)
 #define an initial state for the animation:
 
 def init():
 	line.set_data([],[])
-	return line
+	H_text.set_text('')
+	return line, H_text
 
 #perform animation step
-
+print(DP.GetPath())
 def animate(i):
-	global DP
 	DP.NextStep()
 	line.set_data(DP.GetXY())
-	return line
+	H_text.set_text('H= %.5f J'%DP.GetH())
+	return line,H_text
 
 from time import time
 
 time_0=time()
 animate(0)
 time_1=time()
-I=1000*DP.dt-(time_1-time_0)
+I=DP.Tmax
 
 ani=animation.FuncAnimation(fig,animate,frames=150, interval=I,init_func=init)
 
