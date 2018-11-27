@@ -80,13 +80,13 @@ class Pendulum:
 		plt.ylim([-2.5,2.5])
 		plt.xlim([-2.5,2.5])
 		plt.grid()
-		plt.plot(path[:,1],-path[:,0])
+		plt.plot(path[:,0],path[:,1])
 		plt.show()
 	def GetPath(self):
 		x2,y2=ThetatoXY(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
 		Path=np.zeros((len(self.PSPath),2))
-		Path[:,0]=x2
-		Path[:,1]=y2
+		Path[:,0]=y2
+		Path[:,1]=-x2
 		return Path
 
 	def GetV(self,PhaseSpace=0):
@@ -128,32 +128,32 @@ class Pendulum:
 
 DP=Pendulum()
 DP.Solve('RK4')
-#DP.ShowPath()
+DP.ShowPath()
 #DP.ShowH()
 
 fig = plt.figure()
-ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2,2),ylim=(-2,2))
+ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2.5,2.5),ylim=(-2.5,2.5))
 ax.set_xlabel(r'$x$', fontsize=15)
 ax.set_ylabel(r'$y$', fontsize=15)
 #ax.grid()
 
-ln, = ax.plot([],[], 'o-',lw=2 )
+m2, = ax.plot([],[], 'o-',lw=2 )
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 #define an initial state for the animation:
 
 def init():
-	ln.set_data([],[])
+	m2.set_data([],[])
 	H_text.set_text('')
-	return ln, H_text
+	return m2, H_text
 
 #perform animation step
 #print(DP.GetPath())
 def animate(i):
 	DP.NextStep()
 	Pathm2=DP.GetPath()
-	ln.set_data(Pathm2[i])
+	m2.set_data(Pathm2[i])
 	H_text.set_text('H= %.5f J'%DP.GetH())
-	return ln, H_text
+	return m2, H_text
 
 from time import time
 I=100
