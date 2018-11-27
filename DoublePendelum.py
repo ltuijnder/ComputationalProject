@@ -19,6 +19,12 @@ def ThetatoXY(t1,t2,l1,l2):
     x2=x1+l2*cos(t2)
     y2=y1+l2*sin(t2)
     return x2,y2
+def ThetatoXY1(t1,t2,l1,l2):
+    x1=l1*cos(t1)
+    y1=l1*sin(t1)
+    x2=x1+l2*cos(t2)
+    y2=y1+l2*sin(t2)
+    return x1,y1
 
 class Pendulum:
 	g=9.81
@@ -26,7 +32,7 @@ class Pendulum:
 	dt=0.01
 	t=np.arange(0,Tmax,dt)
 
-	def __init__(self,angle=(pi/2,0),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi/2,pi/2),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s
@@ -88,6 +94,12 @@ class Pendulum:
 		Path[:,0]=y2
 		Path[:,1]=-x2
 		return Path
+	def GetPath1(self):
+		x1,y1=ThetatoXY1(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
+		Path1=np.zeros((len(self.PSPath),2))
+		Path1[:,0]=y1
+		Path1[:,1]=-x1
+		return Path1
 
 	def GetV(self,PhaseSpace=0):
 		if type(PhaseSpace) is int:
@@ -128,7 +140,7 @@ class Pendulum:
 
 DP=Pendulum()
 DP.Solve('RK4')
-DP.ShowPath()
+#DP.ShowPath()
 #DP.ShowH()
 
 fig = plt.figure()
@@ -137,23 +149,29 @@ ax.set_xlabel(r'$x$', fontsize=15)
 ax.set_ylabel(r'$y$', fontsize=15)
 #ax.grid()
 
+m0, = ax.plot(0,0,'o-',lw=2)
+m1, =ax.plot([],[], 'o-',lw=2)
 m2, = ax.plot([],[], 'o-',lw=2 )
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 #define an initial state for the animation:
 
 def init():
+	m0.set_data(0,0)
+	m1.set_data([],[])
 	m2.set_data([],[])
 	H_text.set_text('')
-	return m2, H_text
+	return m0, m1, m2, H_text
 
 #perform animation step
 #print(DP.GetPath())
 def animate(i):
 	DP.NextStep()
+	Pathm1=DP.GetPath1()
 	Pathm2=DP.GetPath()
+	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
 	H_text.set_text('H= %.5f J'%DP.GetH())
-	return m2, H_text
+	return m0, m1, m2, H_text
 
 from time import time
 I=100
