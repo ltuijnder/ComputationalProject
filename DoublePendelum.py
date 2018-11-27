@@ -22,7 +22,7 @@ def ThetatoXY(t1,t2,l1,l2):
 
 class Pendulum:
 	g=9.81
-	Tmax=20
+	Tmax=60
 	dt=0.01
 	t=np.arange(0,Tmax,dt)
 
@@ -133,33 +133,31 @@ DP.Solve('RK4')
 
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2,2),ylim=(-2,2))
+ax.set_xlabel(r'$x$', fontsize=15)
+ax.set_ylabel(r'$y$', fontsize=15)
 #ax.grid()
 
-line, = ax.plot([],[], 'o-',lw=2 )
-H_text=ax.text(1.0,0.95, '',transform=ax.transAxes)
+ln, = ax.plot([],[], 'o-',lw=2 )
+H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 #define an initial state for the animation:
 
 def init():
-	line.set_data([],[])
+	ln.set_data([],[])
 	H_text.set_text('')
-	return line, H_text
+	return ln, H_text
 
 #perform animation step
-print(DP.GetPath())
+#print(DP.GetPath())
 def animate(i):
 	DP.NextStep()
-	line.set_data(DP.GetXY())
+	Pathm2=DP.GetPath()
+	ln.set_data(Pathm2[i])
 	H_text.set_text('H= %.5f J'%DP.GetH())
-	return line,H_text
+	return ln, H_text
 
 from time import time
-
-time_0=time()
-animate(0)
-time_1=time()
-I=DP.Tmax
-
-ani=animation.FuncAnimation(fig,animate,frames=150, interval=I,init_func=init)
+I=100
+ani=animation.FuncAnimation(fig,animate,frames=1000, interval=I,init_func=init, blit=True, repeat=False)
 
 plt.show()
 	
