@@ -55,6 +55,7 @@ class Pendulum:
 		self.w1=U[2]
 		self.w2=U[3]
 		self.PSPath=np.concatenate((self.PSPath,np.array([U])))
+		self.H0=self.GetH()# we will also be resseting H0
 
 	def Solve(self,method):
 		#Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
