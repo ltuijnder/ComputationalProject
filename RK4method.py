@@ -87,6 +87,20 @@ def RK4(dt,Tmax,F,U_0,Peninfo):
     #print("Final U:"+np.str(U))
     return t,U
 
+def RK4_signchange(dt,F,U_0,Peninfo):# This function ONLY keeps track of the phase space in which it transitions
+    # Make 2 buffer. 
+    U_i=U_0
+    U_j=np.zeros(4)
+    t=dt
+    while 1:# check if t_(i+1) is negatief AND t_(i) is positif. Meaning we had a transition
+        U_j=U_i+F1(U_i,dt,F,Peninfo)/6+2/6*(F2(U_i,dt,F,Peninfo)+F3(U_i,dt,F,Peninfo))+F4(U_i,dt,F,Peninfo)/6
+        if ((U_j[0]<0) and (U_i[0]>=0)):
+            break
+        else:
+            U_i=U_j
+            t+=dt
+    return U_i,U_j,t
+
 def euler(dt,Tmax,F,U_0,Peninfo):
     t=np.arange(0,Tmax,dt)# all time evaluations
     U=np.zeros((np.size(t),4))
