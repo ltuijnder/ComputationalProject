@@ -5,17 +5,35 @@
 
 import numpy as np 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import style
 from numpy import sin 
 from numpy import cos
 from numpy import pi
 from RK4method import *
 
+
+style.use('seaborn')
+
+def ThetatoXY(t1,t2,l1,l2):
+    x1=l1*cos(t1)
+    y1=l1*sin(t1)
+    x2=x1+l2*cos(t2)
+    y2=y1+l2*sin(t2)
+    return x2,y2
+def ThetatoXY1(t1,t2,l1,l2):
+    x1=l1*cos(t1)
+    y1=l1*sin(t1)
+    x2=x1+l2*cos(t2)
+    y2=y1+l2*sin(t2)
+    return x1,y1
+
 class Pendulum:
 	g=9.81
-	Tmax=4
+	Tmax=120
 	dt=0.01
 
-	def __init__(self,angle=(pi/2,0),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi/2,pi),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s
@@ -62,7 +80,6 @@ class Pendulum:
 		#self.H0=self.GetH()# we will also be resseting H0
 
 	def Solve(self,method):
-		#Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
 		U_0=(self.t1,self.t2,self.w1,self.w2)
 		if method=='RK4':
 			t,U=RK4(Pendulum.dt,Pendulum.Tmax,F,U_0,self.Peninfo)
@@ -77,25 +94,20 @@ class Pendulum:
 		plt.ylim([-2.5,2.5])
 		plt.xlim([-2.5,2.5])
 		plt.grid()
-		plt.plot(path[:,1],-path[:,0])
+		plt.plot(path[:,0],path[:,1])
 		plt.show()
-
-	def GetXY2(self,t1=0,t2=0):
-		if type(t1) is int:
-			t1=self.t1
-			t2=self.t2
-		x1=self.l1*cos(t1)
-		y1=self.l1*sin(t1)
-		x2=x1+self.l2*cos(t2)
-		y2=y1+self.l2*sin(t2)
-		return x2,y2	
-
 	def GetPath(self):
-		x2,y2=self.GetXY2(self.PSPath[:,0],self.PSPath[:,1])
+		x2,y2=ThetatoXY(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
 		Path=np.zeros((len(self.PSPath),2))
-		Path[:,0]=x2
-		Path[:,1]=y2
+		Path[:,0]=y2
+		Path[:,1]=-x2
 		return Path
+	def GetPath1(self):
+		x1,y1=ThetatoXY1(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
+		Path1=np.zeros((len(self.PSPath),2))
+		Path1[:,0]=y1
+		Path1[:,1]=-x1
+		return Path1
 
 	def GetV(self,PhaseSpace=0):
 		if type(PhaseSpace) is int:
