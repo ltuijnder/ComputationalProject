@@ -28,11 +28,11 @@ def ThetatoXY1(t1,t2,l1,l2):
 
 class Pendulum:
 	g=9.81
-	Tmax=60
+	Tmax=120
 	dt=0.01
 	t=np.arange(0,Tmax,dt)
 
-	def __init__(self,angle=(pi/2,pi/2),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi/2,pi),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s
@@ -147,35 +147,35 @@ fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2.5,2.5),ylim=(-2.5,2.5))
 ax.set_xlabel(r'$x$', fontsize=15)
 ax.set_ylabel(r'$y$', fontsize=15)
+ax.set_title(r'The Double Pendulum', fontsize=17)
 #ax.grid()
 
 m0, = ax.plot(0,0,'o-',lw=2)
 m1, =ax.plot([],[], 'o-',lw=2)
 m2, = ax.plot([],[], 'o-',lw=2 )
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
+t_text=ax.text(0.75,0.90,'',transform=ax.transAxes)
 #define an initial state for the animation:
 
 def init():
 	m0.set_data(0,0)
 	m1.set_data([],[])
 	m2.set_data([],[])
-	H_text.set_text('')
-	return m0, m1, m2, H_text
+	return m0, m1, m2,
 
 #perform animation step
 #print(DP.GetPath())
+Pathm1=DP.GetPath1()
+Pathm2=DP.GetPath()
+
 def animate(i):
-	DP.NextStep()
-	Pathm1=DP.GetPath1()
-	Pathm2=DP.GetPath()
 	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
-	H_text.set_text('H= %.5f J'%DP.GetH())
-	return m0, m1, m2, H_text
+	return m0, m1, m2, 
 
 from time import time
 I=100
-ani=animation.FuncAnimation(fig,animate,frames=1000, interval=I,init_func=init, blit=True, repeat=False)
+ani=animation.FuncAnimation(fig,animate,frames=2000, interval=I,init_func=init, blit=True, repeat=False)
 
 plt.show()
 	
