@@ -6,7 +6,7 @@ from numpy import sin
 from numpy import cos
 from numpy import pi
 from RK4method import *
-from DoublePendelum.py import *
+from DoublePendulum import *
 
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2.5,2.5),ylim=(-2.5,2.5))
