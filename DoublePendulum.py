@@ -143,6 +143,5 @@ DP.Solve('RK4')
 #DP.ShowPath()
 #DP.ShowH()
 
-
 plt.show()
 	
