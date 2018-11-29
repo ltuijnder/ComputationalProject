@@ -2,6 +2,7 @@
 ##############################################
 ## Project DoublePendulum by Lennart & Yens
 ##############################################
+
 import numpy as np 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -10,6 +11,7 @@ from numpy import sin
 from numpy import cos
 from numpy import pi
 from RK4method import *
+
 
 style.use('seaborn')
 
@@ -30,7 +32,6 @@ class Pendulum:
 	g=9.81
 	Tmax=120
 	dt=0.01
-	t=np.arange(0,Tmax,dt)
 
 	def __init__(self,angle=(pi/2,pi),omega=(0,0),mass=(1,2),length=(1,1)):
 		self.t1=angle[0] # in rad
@@ -42,9 +43,9 @@ class Pendulum:
 		self.l1=length[0] # in meter
 		self.l2=length[1] # in meter
 		self.MinE=-Pendulum.g*(self.l1*(self.m1+self.m2)+self.l2*self.m2)
+		self.Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
 		self.H0=self.GetH()
 		self.time=0
-		#self.path=np.array([self.GetXY()[1]])
 		self.PSPath=np.array([[self.t1,self.t2,self.w1,self.w2]])# Phase space path
 
 	def GetThetaOmega(self):
@@ -55,28 +56,35 @@ class Pendulum:
 		y1=self.l1*sin(self.t1)
 		x2=x1+self.l2*cos(self.t2)
 		y2=y1+self.l2*sin(self.t2)
-		return np.array([x1,y1]),np.array([x2,y2])
+		return np.array([[x1,y1],[x2,y2]])
 
 	def NextStep(self):
 		self.time+=Pendulum.dt
-		Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
-		U=(self.t1,self.t2,self.w1,self.w2)
 		dt=Pendulum.dt
-		Unext=U+F1(U,dt,F,Peninfo)/6+2/6*(F2(U,dt,F,Peninfo)+F3(U,dt,F,Peninfo))+F4(U,dt,F,Peninfo)/6
+		U=(self.t1,self.t2,self.w1,self.w2)
+		Unext=U+F1(U,dt,F,self.Peninfo)/6+2/6*(F2(U,dt,F,self.Peninfo)+F3(U,dt,F,self.Peninfo))+F4(U,dt,F,self.Peninfo)/6
 		(self.t1,self.t2,self.w1,self.w2)=Unext
-		#self.path=np.concatenate((self.path,np.array([self.GetXY()[1]])))
-		print(Unext)
 		self.PSPath=np.concatenate((self.PSPath,[Unext]))
 
-	def Solve(self,method):
-		Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
-		#print(Peninfo)
-		U_0=(self.t1,self.t2,self.w1,self.w2)
+	def GetNextStep(self,dt):
+		U=(self.t1,self.t2,self.w1,self.w2)
+		Unext=U+F1(U,dt,F,self.Peninfo)/6+2/6*(F2(U,dt,F,self.Peninfo)+F3(U,dt,F,self.Peninfo))+F4(U,dt,F,self.Peninfo)/6
+		return Unext
 
+	def SetPhaseSpace(self,U):
+		self.t1=U[0]
+		self.t2=U[1]
+		self.w1=U[2]
+		self.w2=U[3]
+		self.PSPath=np.concatenate((self.PSPath,np.array([U])))
+		#self.H0=self.GetH()# we will also be resseting H0
+
+	def Solve(self,method):
+		U_0=(self.t1,self.t2,self.w1,self.w2)
 		if method=='RK4':
-			t,U=RK4(Pendulum.dt,Pendulum.Tmax,F,U_0,Peninfo)#F_internet
+			t,U=RK4(Pendulum.dt,Pendulum.Tmax,F,U_0,self.Peninfo)
 		elif method=='Euler':
-			t,U=euler(Pendulum.dt,Pendulum.Tmax,F,U_0,Peninfo)#F_internet
+			t,U=euler(Pendulum.dt,Pendulum.Tmax,F,U_0,self.Peninfo)
 		(self.t1,self.t2,self.w1,self.w2)=U[-1]
 		self.time+=t[-1]
 		self.PSPath=np.concatenate((self.PSPath[:-1],U))# Everything except the last one since this is the first element of U
@@ -137,11 +145,3 @@ class Pendulum:
 
 	def LogDiffH(self,PhaseSpace=0):
 		return np.log10(self.H0-self.GetH(PhaseSpace))
-
-DP=Pendulum()
-DP.Solve('RK4')
-#DP.ShowPath()
-#DP.ShowH()
-
-plt.show()
-	
