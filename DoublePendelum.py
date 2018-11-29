@@ -164,16 +164,42 @@ def init():
 
 #perform animation step
 #print(DP.GetPath())
-def animate(i):
-	DP.NextStep()
-	Pathm1=DP.GetPath1()
-	Pathm2=DP.GetPath()
+#####
+# DO HERE DP.GetPath() & DP.GetPath1()
+####
+def animate(i): #This function is called 1000 times
+	DP.NextStep()# !!!!! Path is already calculated !!! see above "DP.Solve('RK4')" 
+	Pathm1=DP.GetPath1() # Same as below
+	Pathm2=DP.GetPath()# GetPath returns a whole array ! So this is very inefficient, To everytime call an array with every animate function!!
 	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
 	H_text.set_text('H= %.5f J'%DP.GetH())
 	return m0, m1, m2, H_text
 
-from time import time
+# Before you read the comments, I want to say that your method indeed works good if we don't have caluclated DP.Solve('RK4')
+# in advance, however it's far more effiecient that we do it this way. So to change to that, I have put some comments that will help you on how to change this
+
+### First comment:
+# What you could do, to improve the performance is call "DP.GetPath"& "DP.GetPath1", BEFORE animate(i), see comments
+# And in animate(i) you keep the m1.set_data(Pathm1[i]) and m2.set_data(Pathm2[i]).
+# This is ok, since Pathm1 & Pathm2 are defined outside the function.
+
+### Second comment:
+# Don't call NextStep() since The path is already callculated. Namely when we called DP.Solve('RK4') then DP.PSPath was already filled.
+# This way you can already call GetPath1 & GetPath() before animate(i)
+
+# So what happens when you call DP.NextStep()? Well now you callculate further where DP.Solve('RK4') left off.
+# Since Tmax=60, you will now callculate the points for 60.01,60.02,...seconds and so forth, BUT we want the points with 0,0.01,0.02...seconds
+# And there for we don't need to do DP.NextStep(), That is also what we said we wanted to do, That we first just solve whole the thing, and then animate
+# What you now do is again calculate at each step. 
+
+### Third comment: 
+# This actually is a follow up on the second comment. Because you calculate the points 60.01,60.02,... seconds with NextStep().
+# For this reason DP.GetH() will give you back the hamiltonian on the time points 60.01,60.02,...
+# So I guess to solve this you also just call GetH(PSPath) before the function animate, and change accordingly.
+
+
+from time import time#?
 I=100
 ani=animation.FuncAnimation(fig,animate,frames=1000, interval=I,init_func=init, blit=True, repeat=False)
 
