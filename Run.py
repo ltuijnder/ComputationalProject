@@ -29,20 +29,20 @@ length=(1,1)# length
 DP=Pendulum(theta,omega,mass,length)
 poin=Poincare_map(DP)
 
-#poin.TimeEstimate(1000,10**-10,10)
+poin.TimeEstimate(1000,10**-10,10)
 
-#print("Started solving... Have some patients")
-#start_time = time.time()
-#(points,H_diff,t,error,IterNumber)=poin.Solve(N=10,Precision=10**-10)
-#elapsed_time = time.time() - start_time
-#print("Elapsed_time= "+"{0:.2f}".format(elapsed_time)+ " seconds")
+print("Started solving... Have some patients")
+start_time = time.time()
+(points,H_diff,t,error,IterNumber)=poin.Solve(N=100,Precision=10**-10)
+elapsed_time = time.time() - start_time
+print("Elapsed_time= "+"{0:.2f}".format(elapsed_time)+ " seconds")
 
+poin.ShowDetailed(points,H_diff,t,IterNumber)
+poin.ShowErrors(error)
+poin.ShowSingleSolution(points)
 #poin.ShowDetailed(points,H_diff,t,IterNumber)
-#poin.ShowErrors(error)
-#poin.ShowSingleSolution(points)
-#poin.ShowDetailed(points,H_diff,t,IterNumber)
 
-State=np.array([[pi/2,pi/2,0,0],[pi/2,-pi/2,0,0]])
-N=100#np.array()
-Solution=poin.Solve_set(State,N,Precision=10**-6)
-poin.Show_Map(Solution)
+#State=np.array([[pi/2,pi/2,0,0],[pi/2,-pi/2,0,0]])
+#N=100#np.array()
+#Solution=poin.Solve_set(State,N,Precision=10**-6)
+#poin.Show_Map(Solution)
