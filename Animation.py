@@ -8,6 +8,9 @@ from numpy import pi
 from RK4method import *
 from DoublePendulum import *
 
+DP=Pendulum()
+DP.Solve("RK4")
+
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2.5,2.5),ylim=(-2.5,2.5))
 ax.set_xlabel(r'$x$', fontsize=15)

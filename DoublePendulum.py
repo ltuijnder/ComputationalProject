@@ -96,12 +96,14 @@ class Pendulum:
 		plt.grid()
 		plt.plot(path[:,0],path[:,1])
 		plt.show()
+
 	def GetPath(self):
 		x2,y2=ThetatoXY(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
 		Path=np.zeros((len(self.PSPath),2))
 		Path[:,0]=y2
 		Path[:,1]=-x2
 		return Path
+		
 	def GetPath1(self):
 		x1,y1=ThetatoXY1(self.PSPath[:,0],self.PSPath[:,1],self.l1,self.l2)
 		Path1=np.zeros((len(self.PSPath),2))
