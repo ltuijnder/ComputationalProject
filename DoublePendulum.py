@@ -40,14 +40,18 @@ class Pendulum:
 		y2=y1+self.l2*sin(self.t2)
 		return np.array([[x1,y1],[x2,y2]])
 
-	# def NextStep(self):
-	# 	self.time+=Pendulum.dt
-	# 	Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
-	# 	U=(self.t1,self.t2,self.w1,self.w2)
-	# 	dt=Pendulum.dt
-	# 	Unext=U+F1(U,dt,F,Peninfo)/6+2/6*(F2(U,dt,F,Peninfo)+F3(U,dt,F,Peninfo))+F4(U,dt,F,Peninfo)/6
-	# 	(self.t1,self.t2,self.w1,self.w2)=Unext
-	# 	self.PSPath=np.concatenate((self.PSPath,[Unext]))
+	def NextStep(self):
+		self.time+=Pendulum.dt
+		dt=Pendulum.dt
+		U=(self.t1,self.t2,self.w1,self.w2)
+		Unext=U+F1(U,dt,F,self.Peninfo)/6+2/6*(F2(U,dt,F,self.Peninfo)+F3(U,dt,F,self.Peninfo))+F4(U,dt,F,self.Peninfo)/6
+		(self.t1,self.t2,self.w1,self.w2)=Unext
+		self.PSPath=np.concatenate((self.PSPath,[Unext]))
+
+	def GetNextStep(self,dt):
+		U=(self.t1,self.t2,self.w1,self.w2)
+		Unext=U+F1(U,dt,F,self.Peninfo)/6+2/6*(F2(U,dt,F,self.Peninfo)+F3(U,dt,F,self.Peninfo))+F4(U,dt,F,self.Peninfo)/6
+		return Unext
 
 	def SetPhaseSpace(self,U):
 		self.t1=U[0]
@@ -55,7 +59,7 @@ class Pendulum:
 		self.w1=U[2]
 		self.w2=U[3]
 		self.PSPath=np.concatenate((self.PSPath,np.array([U])))
-		self.H0=self.GetH()# we will also be resseting H0
+		#self.H0=self.GetH()# we will also be resseting H0
 
 	def Solve(self,method):
 		#Peninfo=(Pendulum.g,self.m1,self.m2,self.l1,self.l2)
