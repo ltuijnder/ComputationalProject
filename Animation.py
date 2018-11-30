@@ -39,10 +39,10 @@ Pathm2=DP.GetPath()
 def animate(i):
 	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
-	return m0, m1, m2, 
+	return m0, m1, m2,
 
 from time import time
-I=100
+I=1000*Pendulum.dt
 ani=animation.FuncAnimation(fig,animate,frames=2000, interval=I,init_func=init, blit=True, repeat=False)
 
 plt.show()
