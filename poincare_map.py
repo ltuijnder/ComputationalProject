@@ -110,22 +110,23 @@ class Poincare_map:
 		else:
 			self.DP.SetPhaseSpace(State)# set DP To the state we want.
 			self.E=self.DP.GetH()
-		points=np.zeros((N,2))# These hold the X,Y for the points to scatter
+		PSPoints=np.zeros((N,4))# These hold the all the solutions in the PS. So no in we keep all information
 		H_diff=np.zeros(N) # This holds how much we deviate from the initial H. Can be used for stop condtion
 		Error=np.zeros((N,4)) # This holds the difference between the 2 PhaseSpace points on which the transition happens
 		time=np.zeros(N) # This measures the time between the events
 		IterNumber=np.zeros(N) # This Holds how many bisection itteration we had to do to get the desired precision
 		for i in range(N):
-			U,t,error,number=self.NextPoint(Precision)# Calculate the next point. 
-			points[i]=(U[1],U[3])# (t2,w2) 
+			PhaseSpacePoint,t,error,number=self.NextPoint(Precision)# Calculate the next point. 
+			PSPoints[i]=PhaseSpacePoint
 			H_diff[i]=self.E-self.DP.GetH()
 			Error[i]=(error)
 			time[i]=t# This returns the time it needed to search
 			IterNumber[i]=number
-		return (points,H_diff,time,Error,IterNumber)
+		return (PSPoints,H_diff,time,Error,IterNumber)
 
 	def Solve_set(self,States,N=100,Precision=0.01):
 		N_states=len(States)
+		print("Total number of states given to calculate= "+str(N_states))
 		if type(N) is int:# Why this complex? Well so that N can be more general.
 			N=np.full(N_states,N)
 		elif len(N)!=len(States):
@@ -133,10 +134,15 @@ class Poincare_map:
 			return
 		Solution=np.zeros((N_states,np.max(N),2))# Create a 3 Dimensional array. Dimension 1=Are the solution of the States,Dimension 2=The individual points, Dimension 3=X and Y value of the point
 		# Note in the case that N is not the same every where, the excess point in that array will be zero. Note this is not optimal but much easier
+		PS_Solution=np.zeros((N_states,np.max(N),4))
 		for i in range(N_states):
-			points=self.Solve(N[i],Precision,States[i])[0]# Take the zeroth element or, aka only points
-			Solution[i,:len(points)]=points # Set The i'th state, Then from this i'th state reduce it's length to that of points, such that we can equal.
-		return Solution
+			start_time = time.time()
+			PSPoints=self.Solve(N[i],Precision,States[i])[0]# Take the zeroth element or, aka only points
+			Solution[i,:N[i]]=PSPoints[:,(1,3),] # Set The i'th state, Then from this i'th state reduce it's length to that of points, such that we can equal.
+			elapsed_time = time.time() - start_time
+			PS_Solution[i,:len(PSPoints)]=PSPoints
+			print("Finished calcultion for state number:"+str(i+1)+" In "+"{0:.2f}".format(elapsed_time)+" Seconds")		
+		return Solution,PS_Solution
 
 	def Show_Map(self,Solution):# Maybe add a flag as parameter?
 		fig=plt.figure(figsize=(10,10))
@@ -149,19 +155,26 @@ class Poincare_map:
 			plt.scatter(Solution[i,:,0],Solution[i,:,1])
 		plt.show()
 
-	def GetState(self,E,t2,w2,Threshold): # Given E,t2,w2, it gives back w1 (we assume t1=0)
-		w1lower=0 # This state will result in the lowest possible energy given the t2 and w2
-		if self.DP.GetH(np.array([[0,t2,w1lower,w2]]))>E: # If the Energy is already higher then the Energy of the state we want. Well there is no hope then. Since there is already to much enery contained in t2,W2
+	def GetState(self,E,t2,w2,left_right,Threshold): # Given E,t2,w2, it gives back w1 (we assume t1=0), Convention left=1 right=0
+		PSPath=np.zeros((10000,4))
+		PSPath[:,1]=np.full(10000,t2)# PSPath[:,0]=np.full(N,t1) but t1=0 so it doesn't change anything
+		PSPath[:,2]=np.linspace(-50,50,10000)# go over a lot of possible w1 configurations. (-50,50) is a perfect range for normal states
+		PSPath[:,3]=np.full(10000,w2)
+		MinE=np.min(self.DP.GetH(PSPath))
+		if MinE>E: # If the lowest possible Energy given the t2,w2 is already higher then the Energy want to search, you will not find the E
 			print("ERROR!!!: The state you are looking for doesn't exist, since t2,w2 already contain to much Energy")
 			return np.array([0,0,0,0])
-		w1upper=-20# Set the upperlimit of w1 to be 20 rad/sec. -> This itself is an extreme upperlimit, State above this E, have no interest to us.
+		w1lower=PSPath[:,2][np.argmin(self.DP.GetH(PSPath))]# This returns the w1 where it was minimum. For normal states, this was higher then -20, which is the default upper limit
+		if left_right: # If we take the left solution. then set upper all the way to the right
+			w1upper=-20# Set the upperlimit of w1 to be 20 rad/sec. -> This itself is an extreme upperlimit, State above this E, have no interest to us.
+		else: # Go the opposit direction
+			w1upper=20
 		DiffE=self.DP.GetH(np.array([[0,t2,w1upper,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower,w2]]))
-		w1middle,E_middle=0,0# init w1middle and E_middle # maybe unnecesary in python but that's my habit from C/C++
 		while DiffE>Threshold:
 			w1middle=(w1upper+w1lower)/2
 			E_middle=self.DP.GetH(np.array([[0,t2,w1middle,w2]]))
-			if E_middle-E>0: # Meaning E_middle is above the wanted E. Thus w1upper get's replaced by middle now  
-				w1upper=w1middle  
+			if E_middle>E: # Meaning E_middle is above the wanted E. Thus w1upper get's replaced by middle now  
+				w1upper=w1middle 
 			else: # The middle energy is lower then the wanted E, So we move the lower bound up.
 				w1lower=w1middle
 			DiffE=self.DP.GetH(np.array([[0,t2,w1upper,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower,w2]]))# again now calculate the difference
@@ -170,6 +183,44 @@ class Poincare_map:
 		else:
 			return np.array([0,t2,w1lower,w2])
 
+	def GetStateClose(self,E,t2,w2,Threshold): # Given E,t2,w2, it gives back w1 (we assume t1=0), Convention left=1 right=0
+		PSPath=np.zeros((10000,4))
+		PSPath[:,1]=np.full(10000,t2)# PSPath[:,0]=np.full(N,t1) but t1=0 so it doesn't change anything
+		PSPath[:,2]=np.linspace(-50,50,10000)# go over a lot of possible w1 configurations. (-50,50) is a perfect range for normal states
+		PSPath[:,3]=np.full(10000,w2)
+		MinE=np.min(self.DP.GetH(PSPath))
+		if MinE>E: # If the lowest possible Energy given the t2,w2 is already higher then the Energy want to search, you will not find the E
+			print("ERROR!!!: The state you are looking for doesn't exist, since t2,w2 already contain to much Energy")
+			return np.array([0,0,0,0])
+
+		w1lower_left=PSPath[:,2][np.argmin(self.DP.GetH(PSPath))]# This returns the w1 where it was minimum. For normal states, this was higher then -20, which is the default upper limit
+		w1upper_left=-20# Set the upperlimit of w1 to be 20 rad/sec. -> This itself is an extreme upperlimit, State above this E, have no interest to us.
+		DiffE_left=self.DP.GetH(np.array([[0,t2,w1upper_left,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower_left,w2]]))
+		while DiffE_left>Threshold:
+			w1middle=(w1upper_left+w1lower_left)/2
+			E_middle=self.DP.GetH(np.array([[0,t2,w1middle,w2]]))
+			if E_middle>E: # Meaning E_middle is above the wanted E. Thus w1upper get's replaced by middle now  
+				w1upper_left=w1middle  
+			else: # The middle energy is lower then the wanted E, So we move the lower bound up.
+				w1lower_left=w1middle
+			DiffE_left=self.DP.GetH(np.array([[0,t2,w1upper_left,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower_left,w2]]))# again now calculate the difference
+		
+		w1lower_right=PSPath[:,2][np.argmin(self.DP.GetH(PSPath))]# This returns the w1 where it was minimum. For normal states, this was higher then -20, which is the default upper limit
+		w1upper_right=20
+		DiffE_right=self.DP.GetH(np.array([[0,t2,w1upper_right,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower_right,w2]]))
+		while DiffE_right>Threshold:
+			w1middle=(w1upper_right+w1lower_right)/2
+			E_middle=self.DP.GetH(np.array([[0,t2,w1middle,w2]]))
+			if E_middle>E: # Meaning E_middle is above the wanted E. Thus w1upper get's replaced by middle now  
+				w1upper_right=w1middle  
+			else: # The middle energy is lower then the wanted E, So we move the lower bound up.
+				w1lower_right=w1middle
+			DiffE_right=self.DP.GetH(np.array([[0,t2,w1upper_right,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower_right,w2]]))# again now calculate the difference
+		
+		if abs(w1lower_right)<abs(w1lower_left): # if the value is smaller -> closer to zero
+			return np.array([0,t2,w1lower_right,w2])
+		else:
+			return np.array([0,t2,w1lower_left,w2])
 	def TimeEstimate(self,N,Precision,mode=100,State=0): # This is just for fun
 		# Take 5 time samples.
 		print("Started with estimating time, This time estimated may also take a time")
