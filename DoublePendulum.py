@@ -13,7 +13,6 @@ from numpy import pi
 from RK4method import *
 
 
-style.use('seaborn')
 
 def ThetatoXY(t1,t2,l1,l2):
     x1=l1*cos(t1)
