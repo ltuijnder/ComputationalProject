@@ -73,7 +73,7 @@ class Poincare_map:
 		U_0=(self.DP.t1,self.DP.t2,self.DP.w1,self.DP.w2)
 		U_i,U_j,t=RK4.RK4_signchange(Pendulum.dt,RK4.F,U_0,self.DP.Peninfo)# transition U's
 		U_i,U_j,itternumber,Extratime=self.CloseIn(U_i,U_j,Precision)# Close the gap between the U's
-		t+=Extratime# When closing in we moved "Extratime" forward
+		t+=Extratime# When closing in we moved "Extratime" forward in time
 		self.DP.SetPhaseSpace(U_j) # Set the state after the transition
 		error=U_j-U_i		# Give the difference between the states
 		if abs(U_i[0]-0)<abs(U_j[0]-0):# if return the U_i where theta1 is closed to 0
@@ -94,9 +94,9 @@ class Poincare_map:
 		MaxError=np.max(abs(U_i-U_j))
 		number=0# Just to keep some statistics
 		dt=Pendulum.dt
-		Extratime=0
+		Extratime=0# Keep track how much time we moved forward when we close in
 		while MaxError>Threshold:
-			dt/=2# Go half size
+			dt/=2# Go half size !!! important to make go preciser
 			U_i,U_j,t=self.Bisection(U_i,U_j,dt)
 			MaxError=np.max(abs(U_i-U_j))
 			number+=1
@@ -104,20 +104,20 @@ class Poincare_map:
 		return U_i,U_j,number,Extratime
 
 	def Solve(self,N=100,Precision=0.01,State=0): 
-		if type(State) is int:
-			self.DP=self.Default
+		if type(State) is int: # When no state is given (aka State=0), We use the default State
+			self.DP=self.Default # Second purpose of this is to RESET the self.DP and self.E. Since if you would call Solve again you want to have the same result and not go further in time
 			self.E=self.Default.H0
 		else:
 			self.DP.SetPhaseSpace(State)# set DP To the state we want.
 			self.E=self.DP.GetH()
-		points=np.zeros((N,2))
-		H_diff=np.zeros(N)
-		Error=np.zeros((N,4))
-		time=np.zeros(N)
-		IterNumber=np.zeros(N)
+		points=np.zeros((N,2))# These hold the X,Y for the points to scatter
+		H_diff=np.zeros(N) # This holds how much we deviate from the initial H. Can be used for stop condtion
+		Error=np.zeros((N,4)) # This holds the difference between the 2 PhaseSpace points on which the transition happens
+		time=np.zeros(N) # This measures the time between the events
+		IterNumber=np.zeros(N) # This Holds how many bisection itteration we had to do to get the desired precision
 		for i in range(N):
-			U,t,error,number=self.NextPoint(Precision)
-			points[i]=(U[1],U[3])# (t2,w2)
+			U,t,error,number=self.NextPoint(Precision)# Calculate the next point. 
+			points[i]=(U[1],U[3])# (t2,w2) 
 			H_diff[i]=self.E-self.DP.GetH()
 			Error[i]=(error)
 			time[i]=t# This returns the time it needed to search
@@ -148,6 +148,27 @@ class Poincare_map:
 		for i in range(len(Solution)):
 			plt.scatter(Solution[i,:,0],Solution[i,:,1])
 		plt.show()
+
+	def GetState(self,E,t2,w2,Threshold): # Given E,t2,w2, it gives back w1 (we assume t1=0)
+		w1lower=0 # This state will result in the lowest possible energy given the t2 and w2
+		if self.DP.GetH(np.array([[0,t2,w1lower,w2]]))>E: # If the Energy is already higher then the Energy of the state we want. Well there is no hope then. Since there is already to much enery contained in t2,W2
+			print("ERROR!!!: The state you are looking for doesn't exist, since t2,w2 already contain to much Energy")
+			return np.array([0,0,0,0])
+		w1upper=-20# Set the upperlimit of w1 to be 20 rad/sec. -> This itself is an extreme upperlimit, State above this E, have no interest to us.
+		DiffE=self.DP.GetH(np.array([[0,t2,w1upper,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower,w2]]))
+		w1middle,E_middle=0,0# init w1middle and E_middle # maybe unnecesary in python but that's my habit from C/C++
+		while DiffE>Threshold:
+			w1middle=(w1upper+w1lower)/2
+			E_middle=self.DP.GetH(np.array([[0,t2,w1middle,w2]]))
+			if E_middle-E>0: # Meaning E_middle is above the wanted E. Thus w1upper get's replaced by middle now  
+				w1upper=w1middle  
+			else: # The middle energy is lower then the wanted E, So we move the lower bound up.
+				w1lower=w1middle
+			DiffE=self.DP.GetH(np.array([[0,t2,w1upper,w2]]))-self.DP.GetH(np.array([[0,t2,w1lower,w2]]))# again now calculate the difference
+		if abs(self.DP.GetH(np.array([[0,t2,w1upper,w2]]))-E)<abs(self.DP.GetH(np.array([[0,t2,w1lower,w2]]))-E): # Return the state which is closest to the wanted energy
+			return np.array([0,t2,w1upper,w2])
+		else:
+			return np.array([0,t2,w1lower,w2])
 
 	def TimeEstimate(self,N,Precision,mode=100,State=0): # This is just for fun
 		# Take 5 time samples.

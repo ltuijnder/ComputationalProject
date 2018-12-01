@@ -8,7 +8,15 @@ from numpy import pi
 from RK4method import *
 from DoublePendulum import *
 
-DP=Pendulum()
+style.use('seaborn')
+
+theta=(pi/2,pi/2)# radians
+omega=(0,0)# radians/S
+mass=(1,2)# mass
+length=(1,1)# length
+
+Pendulum.Tmax=60
+DP=Pendulum(theta,omega,mass,length)
 DP.Solve("RK4")
 
 fig = plt.figure()
@@ -39,11 +47,14 @@ Pathm2=DP.GetPath()
 def animate(i):
 	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
-	return m0, m1, m2, 
+	return m0, m1, m2,
 
-from time import time
-I=100
-ani=animation.FuncAnimation(fig,animate,frames=2000, interval=I,init_func=init, blit=True, repeat=False)
+fps=Pendulum.dt**-1
+print('fps='+str(fps))
+I=fps**-1*1000# I=Pendulum.dt*1000=tijd per frame in ms
+Frames=int(fps*Pendulum.Tmax)#  amount of frames=fps*total time
+print("Frames="+str(Frames))
+ani=animation.FuncAnimation(fig,animate,frames=Frames, interval=I,init_func=init, blit=True, repeat=False)
 
 plt.show()
 # Before you read the comments, I want to say that your method indeed works good if we don't have caluclated DP.Solve('RK4')
