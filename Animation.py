@@ -18,6 +18,11 @@ ax.set_ylabel(r'$y$', fontsize=15)
 ax.set_title(r'The Double Pendulum', fontsize=17)
 #ax.grid()
 
+Pathm1=DP.GetPath1()
+Pathm2=DP.GetPath()
+
+ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green')
+ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red')
 m0, = ax.plot(0,0,'o-',lw=2)
 m1, =ax.plot([],[], 'o-',lw=2)
 m2, = ax.plot([],[], 'o-',lw=2 )
@@ -29,17 +34,20 @@ def init():
 	m0.set_data(0,0)
 	m1.set_data([],[])
 	m2.set_data([],[])
-	return m0, m1, m2,
+	ln1.set_data([],[])
+	ln2.set_data([],[])
+	return m0, m1, m2, ln1, ln2,
 
 #perform animation step
 #print(DP.GetPath())
-Pathm1=DP.GetPath1()
-Pathm2=DP.GetPath()
+
 
 def animate(i):
 	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
-	return m0, m1, m2,
+	ln1.set_data((0,Pathm1[i][0]),(0,Pathm1[i][1]))
+	ln2.set_data((Pathm1[i][0],Pathm2[i][0]),(Pathm1[i][1],Pathm2[i][1]))
+	return m0, m1, m2, ln1, ln2,
 
 from time import time
 I=1000*Pendulum.dt
