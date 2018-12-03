@@ -4,8 +4,6 @@
 ##############################################
 
 import numpy as np 
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 from matplotlib import style
 from numpy import sin 
 from numpy import cos
@@ -13,7 +11,7 @@ from numpy import pi
 from RK4method import *
 
 
-style.use('seaborn')
+
 
 def ThetatoXY(t1,t2,l1,l2):
     x1=l1*cos(t1)
@@ -30,7 +28,7 @@ def ThetatoXY1(t1,t2,l1,l2):
 
 class Pendulum:
 	g=9.81
-	Tmax=120
+	Tmax=60
 	dt=0.01
 
 	def __init__(self,angle=(pi/2,pi),omega=(0,0),mass=(1,2),length=(1,1)):

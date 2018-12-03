@@ -7,8 +7,16 @@ from numpy import cos
 from numpy import pi
 from RK4method import *
 from DoublePendulum import *
+style.use('seaborn')
 
-DP=Pendulum()
+
+theta=(pi/2,pi/2)# radians
+omega=(0,0)# radians/S
+mass=(1,2)# mass
+length=(1,1)# length
+
+Pendulum.Tmax=60
+DP=Pendulum(theta,omega,mass,length)
 DP.Solve("RK4")
 
 fig = plt.figure()
@@ -16,34 +24,43 @@ ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2.5,2.5),yli
 ax.set_xlabel(r'$x$', fontsize=15)
 ax.set_ylabel(r'$y$', fontsize=15)
 ax.set_title(r'The Double Pendulum', fontsize=17)
-#ax.grid()
 
+Pathm1=DP.GetPath1()
+Pathm2=DP.GetPath()
+
+ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green')
+ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red')
 m0, = ax.plot(0,0,'o-',lw=2)
 m1, =ax.plot([],[], 'o-',lw=2)
 m2, = ax.plot([],[], 'o-',lw=2 )
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 t_text=ax.text(0.75,0.90,'',transform=ax.transAxes)
-#define an initial state for the animation:
 
+
+#define an initial state for the animation:
 def init():
+	ln1.set_data([],[])
+	ln2.set_data([],[])
 	m0.set_data(0,0)
 	m1.set_data([],[])
 	m2.set_data([],[])
-	return m0, m1, m2,
+	return ln1, ln2, m0, m1, m2,
 
 #perform animation step
-#print(DP.GetPath())
-Pathm1=DP.GetPath1()
-Pathm2=DP.GetPath()
-
 def animate(i):
+	ln1.set_data((0,Pathm1[i][0]),(0,Pathm1[i][1]))
+	ln2.set_data((Pathm1[i][0],Pathm2[i][0]),(Pathm1[i][1],Pathm2[i][1]))
 	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
-	return m0, m1, m2, 
+	return ln1, ln2, m0, m1, m2,
 
-from time import time
-I=100
-ani=animation.FuncAnimation(fig,animate,frames=2000, interval=I,init_func=init, blit=True, repeat=False)
+fps=Pendulum.dt**-1
+print('fps='+str(fps))
+I=fps**-1*1000# I=Pendulum.dt*1000=tijd per frame in ms
+Frames=int(fps*Pendulum.Tmax)#  amount of frames=fps*total time
+print("Frames="+str(Frames))
+ani=animation.FuncAnimation(fig,animate,frames=Frames, interval=I,init_func=init, blit=True, repeat=False)
+
 
 plt.show()
 # Before you read the comments, I want to say that your method indeed works good if we don't have caluclated DP.Solve('RK4')
