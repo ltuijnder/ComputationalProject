@@ -62,17 +62,20 @@ poin=Poincare_map(DP)
 
 E=0.05
 precisionE=10**-15
-t2=np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-w2=np.array([0,-0.05,-0.1,-0.12,-0.117,0.2,0.225,0.25,0.369,0.365,0.38,0.3,0.33,0.4])
-#t2=np.array([0,])
-#w2=np.array([0.2])
-leftright=np.array([1,1,1,1,1,1,1,1,1,1,1,1])
+
+# See Local_saves.txt, for a nice exploration of what the fuck happens. 
+
+t2=np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) # Inside the converging region.
+w2=np.array([0.3872412,0.33,0.34,0.35,0.36,0,0.05,0.1,0.12,0.15,0.2,0.25,0.27,0.30,0.3175]) # limiting case. ( the conversion zone afbakenen)
+leftright=np.full_like(w2,1)
+# Let's now get a good screen converionn to conversion bottom and some nice thing in between
+
 States=np.zeros((len(t2),4))
 for i in range(len(t2)):
 	#States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
-	States[i]=poin.GetStateClose(E,t2[i],w2[i],precisionE)
+	States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
 
-N=20#np.array([100,100,20,20,10,100,100,100])
+N=100#np.array([100,100,20,20,10,100,100,100])
 Solution,PS_Solution=poin.Solve_set(States,N,Precision=10**-10)
 poin.Show_Map(Solution)
 # #print(PS_Solution)
