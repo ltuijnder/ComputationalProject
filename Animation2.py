@@ -15,20 +15,28 @@ omega=(0,0)# radians/S
 mass=(1,2)# mass
 length=(1,1)# length
 
+theta2=(pi/2,3.1415)
+omega2=(0,0)
+mass2=(1,2)
+length2=(1,1)
 
 Pendulum.Tmax=60
 DP=Pendulum(theta,omega,mass,length)
+DP2=Pendulum(theta2,omega2,mass2,length2)
 DP.Solve("RK4")
+DP2.Solve('RK4')
 
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal',autoscale_on=False, xlim=(-2.5,2.5),ylim=(-2.5,2.5))
 ax.set_xlabel(r'$x$', fontsize=15)
 ax.set_ylabel(r'$y$', fontsize=15)
-ax.set_title(r'The Double Pendulum', fontsize=17)
+ax.set_title(r'The Double Pendulum: Small differences in initial conditions', fontsize=17)
 
 Pathm1=DP.GetPath1()
 Pathm2=DP.GetPath()
 
+Path2m1=DP2.GetPath1()
+Path2m2=DP2.GetPath()
 
 ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green')
 ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red')
@@ -38,16 +46,24 @@ m2, = ax.plot([],[], 'o-',markersize=10, color='xkcd:red')
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 t_text=ax.text(0.75,0.90,'',transform=ax.transAxes)
 
+line1, =ax.plot((0,Path2m1[0][0]),(0,Path2m1[0][1]),lw=2, color='xkcd:baby shit green')
+line2, =ax.plot((Path2m1[0][0],Path2m2[0][0]),(Path2m1[0][1],Path2m2[0][1]),lw=2, color='xkcd:reddish orange')
+M1, =ax.plot([],[],'o-',markersize=10, color='xkcd:baby shit green')
+M2, =ax.plot([],[],'o-',markersize=10, color='xkcd:reddish orange')
 
 
 #define an initial state for the animation:
 def init():
 	ln1.set_data([],[])
 	ln2.set_data([],[])
+	line1.set_data([],[])
+	line2.set_data([],[])
 	m0.set_data(0,0)
 	m1.set_data([],[])
 	m2.set_data([],[])
-	return ln1, ln2, m0, m1, m2,
+	M1.set_data([],[])
+	M2.set_data([],[])
+	return ln1, ln2, line1, line2, m0, m1, m2, M1, M2,
 	
 	
 #perform animation step
@@ -56,7 +72,11 @@ def animate(i):
 	ln2.set_data((Pathm1[i][0],Pathm2[i][0]),(Pathm1[i][1],Pathm2[i][1]))
 	m1.set_data(Pathm1[i])
 	m2.set_data(Pathm2[i])
-	return ln1, ln2, m0, m1, m2,
+	line1.set_data((0,Path2m1[i][0]),(0,Path2m1[i][1]))
+	line2.set_data((Path2m1[i][0],Path2m2[i][0]),(Path2m1[i][1],Path2m2[i][1]))
+	M1.set_data(Path2m1[i])
+	M2.set_data(Path2m2[i])
+	return ln1, ln2, m0, m1, m2,line1, line2, M1, M2,
 
 fps=Pendulum.dt**-1
 print('fps='+str(fps))
@@ -68,26 +88,3 @@ ani=animation.FuncAnimation(fig,animate,frames=Frames, interval=I,init_func=init
 
 
 plt.show()
-
-
-# Before you read the comments, I want to say that your method indeed works good if we don't have caluclated DP.Solve('RK4')
-# in advance, however it's far more effiecient that we do it this way. So to change to that, I have put some comments that will help you on how to change this
-
-### First comment:
-# What you could do, to improve the performance is call "DP.GetPath"& "DP.GetPath1", BEFORE animate(i), see comments
-# And in animate(i) you keep the m1.set_data(Pathm1[i]) and m2.set_data(Pathm2[i]).
-# This is ok, since Pathm1 & Pathm2 are defined outside the function.
-
-### Second comment:
-# Don't call NextStep() since The path is already callculated. Namely when we called DP.Solve('RK4') then DP.PSPath was already filled.
-# This way you can already call GetPath1 & GetPath() before animate(i)
-
-# So what happens when you call DP.NextStep()? Well now you callculate further where DP.Solve('RK4') left off.
-# Since Tmax=60, you will now callculate the points for 60.01,60.02,...seconds and so forth, BUT we want the points with 0,0.01,0.02...seconds
-# And there for we don't need to do DP.NextStep(), That is also what we said we wanted to do, That we first just solve whole the thing, and then animate
-# What you now do is again calculate at each step. 
-
-### Third comment: 
-# This actually is a follow up on the second comment. Because you calculate the points 60.01,60.02,... seconds with NextStep().
-# For this reason DP.GetH() will give you back the hamiltonian on the time points 60.01,60.02,...
-# So I guess to solve this you also just call GetH(PSPath) before the function animate, and change accordingly.
