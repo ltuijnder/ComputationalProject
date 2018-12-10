@@ -32,7 +32,7 @@ class Pendulum:
 	Tmax=120
 	dt=0.01
 
-	def __init__(self,angle=(pi/2,pi),omega=(0,0),mass=(1,2),length=(1,1)):
+	def __init__(self,angle=(pi/2,pi),omega=(0,0),mass=(1,1),length=(1,1)):
 		self.t1=angle[0] # in rad
 		self.t2=angle[1] # in rad
 		self.w1=omega[0] # in rad/s

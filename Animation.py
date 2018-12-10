@@ -23,9 +23,9 @@ Pathm2=DP.GetPath()
 
 ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green')
 ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red')
-m0, = ax.plot(0,0,'o-',lw=2)
-m1, =ax.plot([],[], 'o-',lw=2)
-m2, = ax.plot([],[], 'o-',lw=2 )
+m0, = ax.plot(0,0,'*',markersize=20, color= 'xkcd:gold')
+m1, =ax.plot([],[], 'o-',markersize=8*DP.m1, color= 'xkcd:green')
+m2, = ax.plot([],[], 'o-',markersize=8*DP.m2, color='xkcd:red')
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 t_text=ax.text(0.75,0.90,'',transform=ax.transAxes)
 
@@ -52,6 +52,8 @@ I=1000*Pendulum.dt
 ani=animation.FuncAnimation(fig,animate,frames=2000, interval=I,init_func=init, blit=True, repeat=False)
 
 plt.show()
+
+
 # Before you read the comments, I want to say that your method indeed works good if we don't have caluclated DP.Solve('RK4')
 # in advance, however it's far more effiecient that we do it this way. So to change to that, I have put some comments that will help you on how to change this
 
