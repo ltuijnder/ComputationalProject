@@ -10,7 +10,7 @@ from DoublePendulum import *
 style.use('seaborn')
 
 
-theta=(pi/2,pi/2)# radians
+theta=(pi/2,pi)# radians
 omega=(0,0)# radians/S
 mass=(1,2)# mass
 length=(1,1)# length
@@ -31,8 +31,8 @@ Pathm2=DP.GetPath()
 ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green')
 ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red')
 m0, = ax.plot(0,0,'*',markersize=20, color= 'xkcd:gold')
-m1, =ax.plot([],[], 'o-',markersize=8*DP.m1, color= 'xkcd:green')
-m2, = ax.plot([],[], 'o-',markersize=8*DP.m2, color='xkcd:red')
+m1, =ax.plot([],[], 'o-',markersize=10, color= 'xkcd:green')
+m2, = ax.plot([],[], 'o-',markersize=10, color='xkcd:red')
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 t_text=ax.text(0.75,0.90,'',transform=ax.transAxes)
 
