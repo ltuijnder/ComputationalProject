@@ -21,7 +21,7 @@ def Reload(iterative_module_tuple):
 
 
 #(first segment,second segement)
-theta=(pi/2,pi/2)# radians
+theta=(pi/2,0)# radians
 omega=(0,0)# radians/S
 mass=(1,2)# mass
 length=(1,1)# length
@@ -34,6 +34,31 @@ poin=Poincare_map(DP)
 # DP.Solve("RK4")
 # plt.plot(DP.PSPath[:,1])
 # plt.show()
+
+(PSpoints,H_diff,t,error,IterNumber)=poin.Solve(N=1000,Precision=10**-15)
+Points=PSpoints[:,(1,3)]
+poin.ShowSingleSolution(Points)
+
+# Test voor maandag.
+
+# E=0.05
+# precisionE=10**-15
+
+# t2=np.array([0,0]) # Inside the converging region.
+# w2=np.array([0.2,0.25]) # limiting case. ( the conversion zone afbakenen)
+# leftright=np.full_like(w2,1)
+
+
+# # Let's now get a good screen converionn to conversion bottom and some nice thing in between
+
+# States=np.zeros((len(t2),4))
+# for i in range(len(t2)):
+# 	#States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
+# 	States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
+
+# N=100#np.array([100,100,20,20,10,100,100,100])
+# Solution,PS_Solution=poin.Solve_set(States,N,Precision=10**-10)
+# poin.Show_Map(Solution)
 
 #### Plot H
 
@@ -60,25 +85,25 @@ poin=Poincare_map(DP)
 
 #To see the 2 Harmonic solutions, Keep it to a low Energy. Let's choose E=0.05
 
-E=0.05
-precisionE=10**-15
+# E=0.05
+# precisionE=10**-15
 
-# See Local_saves.txt, for a nice exploration of what the fuck happens. 
+# # See Local_saves.txt, for a nice exploration of what the fuck happens. 
 
-t2=np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) # Inside the converging region.
-w2=np.array([0.3872412,0.33,0.34,0.35,0.36,0,0.05,0.1,0.12,0.15,0.2,0.25,0.27,0.30,0.3175]) # limiting case. ( the conversion zone afbakenen)
-leftright=np.full_like(w2,1)
-# Let's now get a good screen converionn to conversion bottom and some nice thing in between
+# t2=np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) # Inside the converging region.
+# w2=np.array([0.3872412,0.33,0.34,0.35,0.36,0,0.05,0.1,0.12,0.15,0.2,0.25,0.27,0.30,0.3175]) # limiting case. ( the conversion zone afbakenen)
+# leftright=np.full_like(w2,1)
+# # Let's now get a good screen converionn to conversion bottom and some nice thing in between
 
-States=np.zeros((len(t2),4))
-for i in range(len(t2)):
-	#States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
-	States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
+# States=np.zeros((len(t2),4))
+# for i in range(len(t2)):
+# 	#States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
+# 	States[i]=poin.GetState(E,t2[i],w2[i],leftright[i],precisionE)
 
-N=100#np.array([100,100,20,20,10,100,100,100])
-Solution,PS_Solution=poin.Solve_set(States,N,Precision=10**-10)
-poin.Show_Map(Solution)
-# #print(PS_Solution)
+# N=100#np.array([100,100,20,20,10,100,100,100])
+# Solution,PS_Solution=poin.Solve_set(States,N,Precision=10**-10)
+# poin.Show_Map(Solution)
+#print(PS_Solution)
 # H=np.zeros((len(Solution),len(Solution[0])))
 # H[0]=DP.GetH(PS_Solution[0])
 
