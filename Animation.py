@@ -10,10 +10,13 @@ from DoublePendulum import *
 style.use('seaborn')
 
 
-theta=(pi,0)# radians
+
+theta=(pi/2,pi)# radians
 omega=(0,0)# radians/S
 mass=(1,2)# mass
 length=(1,1)# length
+
+
 
 Pendulum.Tmax=60
 DP=Pendulum(theta,omega,mass,length)
@@ -25,16 +28,53 @@ ax.set_xlabel(r'$x$', fontsize=15)
 ax.set_ylabel(r'$y$', fontsize=15)
 ax.set_title(r'The Double Pendulum', fontsize=17)
 
-Pathm1=DP.GetPath1()
-Pathm2=DP.GetPath()
+
+
+Pathm1_not60fps=DP.GetPath1()
+Pathm2_not60fps=DP.GetPath()
+
+def Convertfps(array_OldFPS,dt,fpsNew):
+	fpsOld=dt**-1# So we need to get this fpsOld -> fpsNew
+	if fpsOld<fpsNew:
+		print("Fps is lower than 60 fps. It will be played back at this rate")
+		return fpsOld
+	MaxFrameOld=len(array_OldFPS)
+	Tmax=MaxFrameOld/fpsOld
+	MaxFrameNew=Tmax*fpsNew
+	FrameIndexOld=FrameNumberOld(fpsOld,fpsNew,np.arange(MaxFrameNew))
+	array_NewFPS=array_OldFPS[FrameIndexOld]
+	return array_NewFPS
+
+def FrameNumberOld(FpsOld,FpsNew,FrameNumberNew):
+	conver_factor=FpsOld/FpsNew
+	if type(FrameNumberNew)==np.ndarray:# Generally we want FrameNumberNew to be an array which doens't know int()
+		return (FrameNumberNew*conver_factor).astype(int)
+	else:
+		return int(FrameNumberNew*conver_factor)
+
+
+output=Convertfps(Pathm1_not60fps,Pendulum.dt,60)# Convert to 60 fps
+if type(output)== int:
+	Pathm1=Pathm1_not60fps
+	Pathm2=Pathm2_not60fps
+	fps=output
+	I=fps**-1*1000# I=Pendulum.dt*1000=tijd per frame in ms
+	Frames=int(fps*Pendulum.Tmax)#  amount of frames=fps*total time
+else:
+	Pathm1=output
+	Pathm2=Convertfps(Pathm2_not60fps,Pendulum.dt,60)
+	fps=60
+	I=fps**-1*1000# I=Pendulum.dt*1000=tijd per frame in ms
+	Frames=int(fps*Pendulum.Tmax)#  amount of frames=fps*total time
 
 ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green',animated=True)
 ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red',animated=True)
-m0, = ax.plot(0,0,'o-',lw=2,animated=True)
-m1, =ax.plot([],[], 'o-',lw=2,animated=True)
-m2, = ax.plot([],[], 'o-',lw=2,animated=True)
+m0, = ax.plot(0,0,'*',markersize=20, color= 'xkcd:gold',animated=True)
+m1, =ax.plot([],[], 'o-',markersize=10, color= 'xkcd:green',animated=True)
+m2, = ax.plot([],[], 'o-',markersize=10, color='xkcd:red',animated=True)
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 t_text=ax.text(0.75,0.90,'',transform=ax.transAxes)
+
 
 
 #define an initial state for the animation:
@@ -45,7 +85,8 @@ def init():
 	m1.set_data([],[])
 	m2.set_data([],[])
 	return ln1, ln2, m0, m1, m2,
-
+	
+	
 #perform animation step
 def animate(i):
 	ln1.set_data((0,Pathm1[i][0]),(0,Pathm1[i][1]))
@@ -54,36 +95,15 @@ def animate(i):
 	m2.set_data(Pathm2[i])
 	return ln1, ln2, m0, m1, m2,
 
-fps=Pendulum.dt**-1
-print('fps='+str(fps))
-I=fps**-1*1000# I=Pendulum.dt*1000=tijd per frame in ms
-Frames=int(fps*Pendulum.Tmax)#  amount of frames=fps*total time
-print("Frames="+str(Frames))
+
+# fps=60#Pendulum.dt**-1
+# print('fps='+str(fps))
+# I=fps**-1*1000# I=Pendulum.dt*1000=tijd per frame in ms
+# Frames=int(fps*Pendulum.Tmax)#  amount of frames=fps*total time
+# print("Frames="+str(Frames))
 ani=animation.FuncAnimation(fig,animate,frames=Frames, interval=I,init_func=init, blit=True, repeat=False)
 
-#Writer = animation.writers['ffmpeg']
-#writer = Writer(fps=60, metadata=dict(artist='Me'), bitrate=1800)
-#ani.save('testDoublependelum.mp4', writer=writer)
+
+
 
 plt.show()
-# Before you read the comments, I want to say that your method indeed works good if we don't have caluclated DP.Solve('RK4')
-# in advance, however it's far more effiecient that we do it this way. So to change to that, I have put some comments that will help you on how to change this
-
-### First comment:
-# What you could do, to improve the performance is call "DP.GetPath"& "DP.GetPath1", BEFORE animate(i), see comments
-# And in animate(i) you keep the m1.set_data(Pathm1[i]) and m2.set_data(Pathm2[i]).
-# This is ok, since Pathm1 & Pathm2 are defined outside the function.
-
-### Second comment:
-# Don't call NextStep() since The path is already callculated. Namely when we called DP.Solve('RK4') then DP.PSPath was already filled.
-# This way you can already call GetPath1 & GetPath() before animate(i)
-
-# So what happens when you call DP.NextStep()? Well now you callculate further where DP.Solve('RK4') left off.
-# Since Tmax=60, you will now callculate the points for 60.01,60.02,...seconds and so forth, BUT we want the points with 0,0.01,0.02...seconds
-# And there for we don't need to do DP.NextStep(), That is also what we said we wanted to do, That we first just solve whole the thing, and then animate
-# What you now do is again calculate at each step. 
-
-### Third comment: 
-# This actually is a follow up on the second comment. Because you calculate the points 60.01,60.02,... seconds with NextStep().
-# For this reason DP.GetH() will give you back the hamiltonian on the time points 60.01,60.02,...
-# So I guess to solve this you also just call GetH(PSPath) before the function animate, and change accordingly.
