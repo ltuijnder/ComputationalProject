@@ -10,6 +10,7 @@ from DoublePendulum import *
 style.use('seaborn')
 
 
+
 theta=(pi/2,pi)# radians
 omega=(0,0)# radians/S
 mass=(1,2)# mass
@@ -94,10 +95,6 @@ def animate(i):
 	m2.set_data(Pathm2[i])
 	return ln1, ln2, m0, m1, m2,
 
-# Big Problem !! FuncAnimation, also doensn't play it back correctly !!. It does it in 100 seconds while it should be 60 seconds
-# I think it has to do, that the frame rate of computer screens ( at least my laptop) is locked to 60 FPS, the frame have to wait 
-# on the refresshing of my computer. 
-# My solution is to convert to 60 fps right away to function animation.
 
 # fps=60#Pendulum.dt**-1
 # print('fps='+str(fps))
