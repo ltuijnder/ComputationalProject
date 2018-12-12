@@ -15,7 +15,7 @@ omega=(0,0)# radians/S
 mass=(1,2)# mass
 length=(1,1)# length
 
-theta2=(pi/2,3.1415)
+theta2=(pi/2,3.1415926)
 omega2=(0,0)
 mass2=(1,2)
 length2=(1,1)
