@@ -21,7 +21,7 @@ def F(U_i,Peninfo):
     l2=Peninfo[4]
     lx=l2/l1
     denominator=1+mr-ct1t2**2
-    w1_numerator=g/l1*(st2*ct1t2-(mr+1)*st1)-w1**2*st1t2*ct1t2-lx*w2**2*st1t2
+    w1_numerator=g/l1*(st2*ct1t2-(mr+1)*st1)-w1**2/2*s2t1t2-lx*w2**2*st1t2
     w2_numerator=(1+mr)*w1**2/lx*st1t2+w2**2/2*s2t1t2-g/l2*(mr+1)*(st2-st1*ct1t2)
     temp[0]=w1
     temp[1]=w2
