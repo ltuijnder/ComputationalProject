@@ -92,6 +92,9 @@ class Pendulum:
 		plt.ylim([-2.5,2.5])
 		plt.xlim([-2.5,2.5])
 		plt.grid()
+		plt.xlabel(r'$x$', fontsize=17)
+		plt.ylabel(r'$y$', fontsize=17)
+		plt.title(r'Path of $m_2$', fontsize=17)
 		plt.plot(path[:,0],path[:,1])
 		plt.show()
 
