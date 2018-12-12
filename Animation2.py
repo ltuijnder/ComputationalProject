@@ -38,18 +38,18 @@ Pathm2=DP.GetPath()
 Path2m1=DP2.GetPath1()
 Path2m2=DP2.GetPath()
 
-ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green')
-ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red')
-m0, = ax.plot(0,0,'*',markersize=20, color= 'xkcd:gold')
-m1, =ax.plot([],[], 'o-',markersize=10, color= 'xkcd:green')
-m2, = ax.plot([],[], 'o-',markersize=10, color='xkcd:red')
+ln1, =ax.plot((0,Pathm1[0][0]),(0,Pathm1[0][1]),lw=2, color='xkcd:green',animated=True)
+ln2, =ax.plot((Pathm1[0][0],Pathm2[0][0]),(Pathm1[0][1],Pathm2[0][1]),lw=2, color='xkcd:red',animated=True)
+m0, = ax.plot(0,0,'*',markersize=20, color= 'xkcd:gold',animated=True)
+m1, =ax.plot([],[], 'o-',markersize=10, color= 'xkcd:green',animated=True)
+m2, = ax.plot([],[], 'o-',markersize=10, color='xkcd:red',animated=True)
 H_text=ax.text(0.75,0.95, '',transform=ax.transAxes)
 t_text=ax.text(0.75,0.90,'',transform=ax.transAxes)
 
-line1, =ax.plot((0,Path2m1[0][0]),(0,Path2m1[0][1]),lw=2, color='xkcd:baby shit green')
-line2, =ax.plot((Path2m1[0][0],Path2m2[0][0]),(Path2m1[0][1],Path2m2[0][1]),lw=2, color='xkcd:reddish orange')
-M1, =ax.plot([],[],'o-',markersize=10, color='xkcd:baby shit green')
-M2, =ax.plot([],[],'o-',markersize=10, color='xkcd:reddish orange')
+line1, =ax.plot((0,Path2m1[0][0]),(0,Path2m1[0][1]),lw=2, color='xkcd:leaf green',animated=True)
+line2, =ax.plot((Path2m1[0][0],Path2m2[0][0]),(Path2m1[0][1],Path2m2[0][1]),lw=2, color='xkcd:reddish orange',animated=True)
+M1, =ax.plot([],[],'o-',markersize=10, color='xkcd:leaf green',animated=True)
+M2, =ax.plot([],[],'o-',markersize=10, color='xkcd:reddish orange',animated=True)
 
 
 #define an initial state for the animation:
