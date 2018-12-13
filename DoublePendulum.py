@@ -136,6 +136,10 @@ class Pendulum:
 
 	def ShowH(self):
 		plt.plot(np.linspace(0,self.time,len(self.PSPath)),self.GetH(self.PSPath))
+		plt.xlabel(r'$t$ [s]', fontsize=17)
+		plt.ylabel(r'$H$ [J]', fontsize=17)
+		plt.title('Energy Conservation', fontsize=17)
+		plt.grid()
 		plt.show()
 
 	def ShowV(self):
